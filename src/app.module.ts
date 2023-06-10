@@ -22,7 +22,7 @@ import { MenuController } from './modules/menu/infrastucture/delivery/menu.contr
     GetMenuQueryHandler,
     MenuUpdateCommandHandler,
     MenuMongoAdapter,
-    PrismaService
+    PrismaService,
   ],
 })
 export class AppModule {}
