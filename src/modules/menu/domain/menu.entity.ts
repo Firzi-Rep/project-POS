@@ -1,4 +1,4 @@
 export class MenuEntity {
-    name: string;
-    price: number;
+  name: string;
+  price: number;
 }

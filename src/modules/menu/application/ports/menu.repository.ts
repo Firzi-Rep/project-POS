@@ -1,16 +1,14 @@
-import { MenuEntity } from "../../domain/menu.entity";
-import { CreateMenuProps, QueryMenuProps } from "../types";
+import { MenuEntity } from '../../domain/menu.entity';
+import { CreateMenuProps, UpdateMenuProps } from '../types';
 
 export const MENU_REPOSITORY = 'MENU_REPOSITORY';
 
 export interface MenuRepository {
-    create(props: CreateMenuProps): Promise<MenuEntity>
+  create(props: CreateMenuProps): Promise<MenuEntity>;
 
-    update(props: any)
+  findById(id: string): Promise<MenuEntity>;
+
+  update(props: UpdateMenuProps): Promise<MenuEntity>;
+
+  deleteById(id: string): Promise<void>;
 }
-
-export interface MenuRepository {
-    // ...
-    findById(id: string): Promise<MenuEntity>;
-    // ...
-  }

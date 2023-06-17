@@ -1,21 +1,20 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class UpdateMenuRequest {
-    name: string;
-    price: number;
-}
-
-
-export interface IMenu extends Document {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
   name: string;
+  
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
   price: number;
-  // Add any other properties as needed
+
+  constructor(public readonly id: string, name: string, price: number) {
+    this.id = id;
+    this.name = name;
+    this.price = price;
+  }
 }
-
-const menuSchema = new Schema<IMenu>({
-  name: { type: String, required: true },
-  price: { type: Number, required: true },
-  // Add any other schema properties as needed
-});
-
-export const MenuModel = mongoose.model<IMenu>('Menu', menuSchema);

@@ -1,3 +1,3 @@
-export class GetMenuQueryRequest {
+export class DeleteMenuRequest {
   constructor(public readonly id: string) {}
 }
