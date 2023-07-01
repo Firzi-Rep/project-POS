@@ -10,10 +10,108 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model Menu {
   id String @id @default(auto()) @db.ObjectId @map("_id")
   name String
   price Float
 
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
   @@map("menu")
+}
+
+model User {
+  id          String    @id @default(auto()) @db.ObjectId() @map("_id")
+  name        String
+  email       String    @unique
+  password    String
+  role        Role      @default(CASHIER)
+  employee    Employee?
+  transactions Transaction[]
+
+  @@map("user")
+}
+
+model Employee {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId()
+  user_id     String  @unique @db.ObjectId()
+  user_info   User    @relation(fields: [user_id], references: [id])
+  address     String
+  birth_date  DateTime
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("employee")
+}
+
+enum Role {
+  ADMIN
+  CASHIER
+}
+
+model CategoryProduct {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId()
+  name               String    // Category Product Name: makanan & minuman
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+  Product            Product[]
+
+  @@map("category_product")
+}
+
+model Product {
+  id                 String          @id @default(auto()) @map("_id") @db.ObjectId()
+  name               String          // teh 
+  price              Float           // harga 5000
+  cat_product_id     String          @db.ObjectId() // category product id si makanan/minuman
+  cat_product_detail CategoryProduct @relation(fields: [cat_product_id],references: [id] )
+  created_at         DateTime        @default(now())
+  updated_at         DateTime        @updatedAt
+  Variants           ProductVariant[]
+  TransactionDetails TransactionDetails[] // this product is existing on this certain transaction
+
+  @@map("product")
+}
+
+model ProductVariant {
+  id                 String       @id @default(auto()) @map("_id") @db.ObjectId()
+  name               String       // dingin
+  product_id         String       @db.ObjectId() // product id si teh
+  product_detail     Product      @relation(fields: [product_id],references: [id] )
+  aritmatics_op      AritmaticsOp @default(NONE) // ADD
+  factor             Float        @default(0) // 2000
+
+  @@map("product_variant")
+}
+
+enum AritmaticsOp {
+    ADD
+    SUBSTRACT
+    MULTIPLY
+    DEVIDE
+    NONE
+}
+
+model Transaction {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId()
+  cashier_id   String   @unique @db.ObjectId()
+  cashier_info User     @relation(fields: [cashier_id], references: [id])
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  transaction_details TransactionDetails[]
+
+  @@map("transaction")
+}
+
+model TransactionDetails {
+  id               String      @id @default(auto()) @map("_id") @db.ObjectId()
+  transaction_id   String      @db.ObjectId()
+  transaction_info Transaction @relation(fields: [transaction_id], references: [id])
+  product_id       String      @db.ObjectId()
+  product_info     Product     @relation(fields: [product_id], references: [id])
+
+  @@map("transaction_details")
 }

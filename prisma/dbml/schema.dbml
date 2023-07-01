@@ -1,0 +1,82 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table user {
+  id String [pk]
+  phone String [unique, not null]
+  email String [unique, not null]
+  password String [not null]
+  role Role [not null, default: 'CASHIER']
+  employee employee
+  transactions transaction [not null]
+}
+
+Table employee {
+  id String [pk]
+  user_id String [unique, not null]
+  user_info user [not null]
+  address String [not null]
+  birth_date DateTime [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+}
+
+Table product {
+  id String [pk]
+  name String [not null]
+  price Float [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  Variants product_variant [not null]
+  TransactionDetails transaction_details [not null]
+}
+
+Table product_variant {
+  id String [pk]
+  name String [not null]
+  product_id String [not null]
+  product_detail product [not null]
+  aritmatics_op AritmaticsOp [not null, default: 'NONE']
+  factor Float [not null, default: 0]
+}
+
+Table transaction {
+  id String [pk]
+  cashier_id String [unique, not null]
+  cashier_info user [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  transaction_details transaction_details [not null]
+}
+
+Table transaction_details {
+  id String [pk]
+  transaction_id String [not null]
+  transaction_info transaction [not null]
+  product_id String [not null]
+  product_info product [not null]
+}
+
+Enum Role {
+  ADMIN
+  CASHIER
+}
+
+Enum AritmaticsOp {
+  ADD
+  SUBSTRACT
+  MULTIPLY
+  DEVIDE
+  NONE
+}
+
+Ref: employee.user_id - user.id
+
+Ref: product_variant.product_id > product.id
+
+Ref: transaction.cashier_id > user.id
+
+Ref: transaction_details.transaction_id > transaction.id
+
+Ref: transaction_details.product_id > product.id
