@@ -65,8 +65,8 @@ model Product {
   id                 String          @id @default(auto()) @map("_id") @db.ObjectId()
   name               String          // teh 
   price              Float           // harga 5000
-  cat_product_id     String          @db.ObjectId() // category product id si makanan/minuman
-  cat_product_detail CategoryProduct @relation(fields: [cat_product_id],references: [id] )
+  cat_product_id     String?          @db.ObjectId() // category product id si makanan/minuman
+  cat_product_detail CategoryProduct? @relation(fields: [cat_product_id],references: [id] )
   created_at         DateTime        @default(now())
   updated_at         DateTime        @updatedAt
   Variants           ProductVariant[]
