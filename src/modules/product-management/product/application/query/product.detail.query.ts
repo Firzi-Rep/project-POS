@@ -7,7 +7,9 @@ export class ProductDetailQuery {
 }
 
 @QueryHandler(ProductDetailQuery)
-export class ProductDetailQueryHandler implements IQueryHandler<ProductDetailQuery> {
+export class ProductDetailQueryHandler
+  implements IQueryHandler<ProductDetailQuery>
+{
   constructor(
     @Inject('PRODUCT_REPOSITORY')
     private readonly productRepository: ProductRepository,
@@ -17,7 +19,7 @@ export class ProductDetailQueryHandler implements IQueryHandler<ProductDetailQue
     const productId = query.id;
     const product = await this.productRepository.findById(productId);
     if (!product) {
-      throw new Error('Product not found');
+      throw new Error('Product not found!');
     }
     return product;
   }

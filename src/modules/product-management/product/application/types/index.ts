@@ -1,7 +1,7 @@
 export interface CreateProductProps {
   name: string;
   price: number;
-  cat_product_id?: string;
+  category_id?: string;
 }
 
 export interface QueryProductProps {

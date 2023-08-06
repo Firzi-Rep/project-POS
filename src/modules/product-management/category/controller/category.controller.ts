@@ -39,7 +39,7 @@ export class CategoryController {
         CategoryCreateCommandResult
       >(command);
 
-      console.log('result on controller', result);
+      // console.log('result on controller', result);
       return {
         statusCode: 201,
         message: 'success',

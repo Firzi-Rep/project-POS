@@ -1,11 +1,12 @@
-import { Inject } from "@nestjs/common";
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { ProductRepository } from "../ports/product.repository";
-import { ProductEntity } from "../../domain/product.entity";
+import { Inject } from '@nestjs/common';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { ProductRepository } from '../ports/product.repository';
+import { ProductEntity } from '../../domain/product.entity';
 
 export class ProductCreateCommand {
-    name: string;
-    price: number;
+  name: string;
+  price: number;
+  category_id?: string;
 }
 
 export class ProductCreateCommandResult {
@@ -14,19 +15,19 @@ export class ProductCreateCommandResult {
 
 @CommandHandler(ProductCreateCommand)
 export class ProductCreateCommandHandler
-    implements ICommandHandler<ProductCreateCommand>
-    {
-        constructor(
-            @Inject('PRODUCT_REPOSITORY') // inject menu repository (as a connection to db)
-            private readonly productRepo: ProductRepository,
-          ) {}
+  implements ICommandHandler<ProductCreateCommand>
+{
+  constructor(
+    @Inject('PRODUCT_REPOSITORY') // inject menu repository (as a connection to db)
+    private readonly productRepo: ProductRepository,
+  ) {}
 
-          async execute(command: ProductCreateCommand) {
-            // console.log('masuk command product create ni bos wkwkwk' )
-            const product = await this.productRepo.create(command);
+  async execute(command: ProductCreateCommand) {
+    // console.log('masuk command product create ni bos wkwkwk' )
+    const product = await this.productRepo.create(command);
 
-            return {
-              product,
-            }
-          }
-    }
+    return {
+      product,
+    };
+  }
+}

@@ -24,7 +24,7 @@ export class ProductMongoAdapter implements ProductRepository {
         data: {
           name: props.name,
           price: props.price,
-          cat_product_id: props.cat_product_id,
+          category_id: props.category_id,
         },
       });
 
@@ -55,7 +55,7 @@ export class ProductMongoAdapter implements ProductRepository {
         data: {
           name: props.name,
           price: props.price,
-          cat_product_id: props.category_id,
+          category_id: props.category_id,
         },
       });
 
@@ -74,14 +74,14 @@ export class ProductMongoAdapter implements ProductRepository {
     let prisma = this.prismaService;
     if (session) prisma = session;
 
-    const result = await prisma.menu.findUnique({
+    const result = await prisma.product.findUnique({
       where: {
         id: id,
       },
     });
 
     if (!result) {
-      throw new Error('Menu not found');
+      return null;
     }
 
     const entity = Builder<ProductEntity>(ProductEntity, {
