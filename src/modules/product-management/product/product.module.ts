@@ -6,6 +6,8 @@ import { ProductUpdateCommandHandler } from './application/command/product.updat
 import { ProductController } from './infrastucture/delivery/product.http.controller';
 import { ProductDetailQueryHandler } from './application/query/product.detail.query';
 import { ProductMongoAdapter } from './infrastucture/adapter/product.mongo.adapter';
+import { ProductFindManyQueryHandler } from './application/query/product.find.many.query';
+import { ProductDeleteCommandHandler } from './application/command/product.delete.command';
 
 const repositories: Provider[] = [
   {
@@ -16,9 +18,13 @@ const repositories: Provider[] = [
 const commands: Provider[] = [
   ProductCreateCommandHandler,
   ProductUpdateCommandHandler,
+  ProductDeleteCommandHandler,
 ];
 
-const queryHandlers: Provider[] = [ProductDetailQueryHandler];
+const queryHandlers: Provider[] = [
+  ProductDetailQueryHandler,
+  ProductFindManyQueryHandler,
+];
 
 @Module({
   imports: [CqrsModule],

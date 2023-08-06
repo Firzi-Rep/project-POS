@@ -9,6 +9,7 @@ import {
   Query,
   Param,
   Patch,
+  Put,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Builder } from 'builder-pattern';
@@ -25,15 +26,31 @@ import {
 } from '../../application/command/product.update.command';
 import { ProductDetailQuery } from 'src/modules/product-management/product/application/query/product.detail.query';
 import { ProductEntity } from 'src/modules/product-management/product/domain/product.entity';
+import {
+  baseHttpResponseHelper,
+  basePaginatedResponseHelper,
+} from '../../../../../core/helpers/base.response.helper';
+import { ProductFindManyQueryDto } from '../dto/product.find.many.query.dto';
+import {
+  ProductFindManyQuery,
+  ProductFindManyQueryResult,
+} from '../../application/query/product.find.many.query';
+import {
+  ProductDeleteCommand,
+  ProductDeleteCommandResult,
+} from '../../application/command/product.delete.command';
+import { ProductDeleteManyDto } from '../dto/product.delete.many.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('product-management/products')
+@ApiTags('Product')
 export class ProductController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
 
-  @Post('create')
+  @Post()
   async create(@Body() dto: ProductCreateDto) {
     try {
       // console.log("masuk ke controller create product dengan payload",dto)
@@ -57,55 +74,73 @@ export class ProductController {
     }
   }
 
-  // @Get()
-  // async findMany(
-  //   @Res() res: Response,
-  //   @Query() dto: ProductFindManyQueryDto,
-  // ) {
-  //   const { page, limit } = dto;
+  @Get()
+  async findMany(@Res() res: Response, @Query() dto: ProductFindManyQueryDto) {
+    const builder = Builder<ProductFindManyQuery>(ProductFindManyQuery, {
+      ...dto,
+    });
 
-  //   const responseBuilder = Builder<
-  //     BaseHttpPaginatedResponseDto<ProductEntity[], any>
-  //   >(BaseHttpPaginatedResponseDto);
-  //   responseBuilder.statusCode(200);
-  //   responseBuilder.message('Product List Fetched Successfully!');
+    const { data, total } = await this.queryBus.execute<
+      ProductFindManyQuery,
+      ProductFindManyQueryResult
+    >(builder.build());
 
-  //   const builder = Builder<ProductFindManyQuery>(
-  //     ProductFindManyQuery,
-  //     {
-  //       ...dto,
-  //     },
-  //   );
+    return basePaginatedResponseHelper(res, {
+      data: data,
+      total,
+      page: dto.page,
+      per_page: dto.limit,
+    });
+  }
 
-  //   const { result, total } = await this.queryBus.execute<
-  //     ProductFindManyQuery,
-  //     ProductFindManyQueryResult
-  //   >(builder.build());
+  @Post('delete-many')
+  async deleteMany(@Body() dto: ProductDeleteManyDto) {
+    // console.log("masuk ke controller create product dengan payload",dto)
+    const command = Builder<ProductDeleteCommand>(ProductDeleteCommand, {
+      ...dto,
+    }).build();
 
-  //   responseBuilder.data(result);
-  //   responseBuilder.page(page);
-  //   responseBuilder.per_page(limit);
-  //   responseBuilder.total(total);
+    await this.commandBus.execute<
+      ProductDeleteCommand,
+      ProductDeleteCommandResult
+    >(command);
 
-  //   return basePaginatedResponseHelper(res, responseBuilder.build());
-  // }
+    return {
+      statusCode: 200,
+      message: 'success',
+      data: null,
+    };
+  }
 
   @Get(':id')
   async findById(@Res() res: Response, @Param('id') id: string) {
-    const query = Builder<ProductDetailQuery>(ProductDetailQuery, {
-      id,
-    }).build();
+    try {
+      const query = Builder<ProductDetailQuery>(ProductDetailQuery, {
+        id,
+      }).build();
 
-    const result = await this.queryBus.execute(query);
+      const result = await this.queryBus.execute(query);
 
-    return result;
+      // console.trace("result",result)
+
+      return baseHttpResponseHelper(res, {
+        data: result,
+      });
+    } catch (e) {
+      console.trace(e);
+    }
   }
 
-  @Post('update')
-  async update(@Res() res: Response, @Body() dto: ProductUpdateDto) {
+  @Put(':id')
+  async update(
+    @Res() res: Response,
+    @Body() dto: ProductUpdateDto,
+    @Param('id') id: string,
+  ) {
     try {
       const command = Builder<ProductUpdateCommand>(ProductUpdateCommand, {
         ...dto,
+        id,
       }).build();
 
       const result = await this.commandBus.execute<
@@ -113,7 +148,9 @@ export class ProductController {
         ProductUpdateCommandResult
       >(command);
 
-      return result;
+      return baseHttpResponseHelper(res, {
+        data: result,
+      });
     } catch (e) {
       throw e;
     }
