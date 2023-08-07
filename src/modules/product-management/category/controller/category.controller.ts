@@ -9,6 +9,7 @@ import {
   Query,
   Param,
   Patch,
+  Put,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Builder } from 'builder-pattern';
@@ -24,8 +25,21 @@ import {
   CategoryFindManyQuery,
   CategoryFindManyQueryResult,
 } from 'src/modules/product-management/category/queries/category.find.many.query';
-import { basePaginatedResponseHelper } from 'src/core/helpers/base.response.helper';
+import {
+  baseHttpResponseHelper,
+  basePaginatedResponseHelper,
+} from 'src/core/helpers/base.response.helper';
 import { ApiTags } from '@nestjs/swagger';
+import { CategoryUpdateDto } from 'src/modules/product-management/category/dto/category.update.dto';
+import {
+  CategoryUpdateCommand,
+  CategoryUpdateCommandResult,
+} from 'src/modules/product-management/category/command/category.update.command';
+import { CategoryDeleteManyDto } from 'src/modules/product-management/category/dto/category.delete.dto';
+import {
+  CategoryDeleteCommand,
+  CategoryDeleteCommandResult,
+} from 'src/modules/product-management/category/command/category.delete.command';
 
 @Controller('product-management/category')
 @ApiTags('Category')
@@ -77,6 +91,50 @@ export class CategoryController {
       page: dto.page,
       per_page: dto.limit,
     });
+  }
+
+  @Put(':id')
+  async update(
+    @Res() res: Response,
+    @Body() dto: CategoryUpdateDto,
+    @Param('id') id: string,
+  ) {
+    try {
+      const command = Builder<CategoryUpdateCommand>(CategoryUpdateCommand, {
+        ...dto,
+        id,
+      }).build();
+
+      const result = await this.commandBus.execute<
+        CategoryUpdateCommand,
+        CategoryUpdateCommandResult
+      >(command);
+
+      return baseHttpResponseHelper(res, {
+        data: result,
+      });
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  @Post('delete-many')
+  async deleteMany(@Body() dto: CategoryDeleteManyDto) {
+    // console.log("masuk ke controller create product dengan payload",dto)
+    const command = Builder<CategoryDeleteCommand>(CategoryDeleteCommand, {
+      ...dto,
+    }).build();
+
+    await this.commandBus.execute<
+      CategoryDeleteCommand,
+      CategoryDeleteCommandResult
+    >(command);
+
+    return {
+      statusCode: 200,
+      message: 'success',
+      data: null,
+    };
   }
 
   //     @Get()

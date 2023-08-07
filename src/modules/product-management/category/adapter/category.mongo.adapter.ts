@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Builder } from 'builder-pattern';
 import { PrismaService } from 'src/modules/shared/prisma/prisma.service';
 import { CategoryEntity } from '../entity/category.entity';
-import { CreateCategoryProps } from '../types';
+import { CreateCategoryProps, UpdateCategoryProps } from '../types';
 import {
   CategoryFindManyQueryProps,
   CategoryRepository,
@@ -101,6 +101,49 @@ export class CategoryMongoAdapter implements CategoryRepository {
     const result = await this.prismaService.categoryProduct.count();
 
     return result;
+  }
+
+  async update(
+    props: UpdateCategoryProps,
+    session?: PrismaService,
+  ): Promise<CategoryEntity> {
+    try {
+      let prisma = this.prismaService;
+      if (session) prisma = session;
+
+      const result = await prisma.categoryProduct.update({
+        where: {
+          id: props.id,
+        },
+        data: {
+          name: props.name,
+        },
+      });
+
+      const entity = Builder<CategoryEntity>(CategoryEntity, {
+        ...result,
+      }).build();
+
+      return entity;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async deleteMany(ids: string[]): Promise<void> {
+    try {
+      await this.prismaService.categoryProduct.deleteMany({
+        where: {
+          id: {
+            in: ids,
+          },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   //    async update(props: UpdateProps, session?: PrismaService): Promise<Entity> {
