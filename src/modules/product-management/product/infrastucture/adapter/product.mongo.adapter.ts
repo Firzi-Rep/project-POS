@@ -105,7 +105,7 @@ export class ProductMongoAdapter implements ProductRepository {
 
   async deleteById(id: string): Promise<void> {
     try {
-      await this.prismaService.menu.delete({
+      await this.prismaService.product.delete({
         where: {
           id: id,
         },

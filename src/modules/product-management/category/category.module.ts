@@ -4,6 +4,7 @@ import { CATEGORY_REPOSITORY } from './ports/category.repository';
 import { CategoryMongoAdapter } from './adapter/category.mongo.adapter';
 import { CategoryCreateCommandHandler } from './command/category.create.command';
 import { CategoryController } from './controller/category.controller';
+import { CategoryFindManyQueryHandler } from 'src/modules/product-management/category/queries/category.find.many.query';
 
 const repositories: Provider[] = [
   {
@@ -13,10 +14,13 @@ const repositories: Provider[] = [
 ];
 const commands: Provider[] = [
   CategoryCreateCommandHandler,
-//   ProductUpdateCommandHandler,
+  //   ProductUpdateCommandHandler,
 ];
 
-const queryHandlers: Provider[] = [CategoryCreateCommandHandler];
+const queryHandlers: Provider[] = [
+  CategoryCreateCommandHandler,
+  CategoryFindManyQueryHandler,
+];
 
 @Module({
   imports: [CqrsModule],

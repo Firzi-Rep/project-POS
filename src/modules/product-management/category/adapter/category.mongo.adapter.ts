@@ -3,8 +3,13 @@ import { Builder } from 'builder-pattern';
 import { PrismaService } from 'src/modules/shared/prisma/prisma.service';
 import { CategoryEntity } from '../entity/category.entity';
 import { CreateCategoryProps } from '../types';
+import {
+  CategoryFindManyQueryProps,
+  CategoryRepository,
+} from 'src/modules/product-management/category/ports/category.repository';
+import { ProductEntity } from 'src/modules/product-management/product/domain/product.entity';
 @Injectable()
-export class CategoryMongoAdapter {
+export class CategoryMongoAdapter implements CategoryRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(
@@ -31,6 +36,71 @@ export class CategoryMongoAdapter {
       console.trace(error);
       throw error;
     }
+  }
+
+  async findById(id: string, session?: PrismaService): Promise<CategoryEntity> {
+    let prisma = this.prismaService;
+    if (session) prisma = session;
+
+    const result = await prisma.product.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    if (!result) {
+      return null;
+    }
+
+    const categoryEntity = Builder<CategoryEntity>(CategoryEntity, {
+      ...result.category,
+    }).build();
+
+    // const entity = Builder<ProductEntity>(ProductEntity, {
+    //   ...result,
+    //   category: categoryEntity,
+    // }).build();
+
+    return categoryEntity;
+  }
+
+  async findMany(props: CategoryFindManyQueryProps): Promise<CategoryEntity[]> {
+    const { page, limit } = props;
+
+    const getLimit = limit ? limit : 10;
+    const getPage = page ? page : 1;
+    const offset = (getPage - 1) * getLimit;
+
+    const result = await this.prismaService.product.findMany({
+      skip: offset,
+      take: getLimit,
+      include: {
+        category: true,
+      },
+    });
+
+    const entity = result.map((item) => {
+      const categoryEntity = Builder<CategoryEntity>(CategoryEntity, {
+        ...item.category,
+      }).build();
+
+      // return Builder<ProductEntity>(ProductEntity, {
+      //   ...item,
+      //   category: categoryEntity,
+      // }).build();
+      return categoryEntity;
+    });
+
+    return entity;
+  }
+
+  async countMany(props: CategoryFindManyQueryProps): Promise<number> {
+    const result = await this.prismaService.categoryProduct.count();
+
+    return result;
   }
 
   //    async update(props: UpdateProps, session?: PrismaService): Promise<Entity> {

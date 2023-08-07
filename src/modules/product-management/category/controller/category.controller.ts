@@ -18,8 +18,17 @@ import {
   CategoryCreateCommandResult,
 } from '../command/category.create.command';
 import { CategoryCreateDto } from '../dto/category.create.dto';
+import { CategoryFindManyQueryDto } from 'src/modules/product-management/category/dto/category.find.many.query.dto';
+import { CategoryDetailQuery } from 'src/modules/product-management/category/queries/category.detail.query';
+import {
+  CategoryFindManyQuery,
+  CategoryFindManyQueryResult,
+} from 'src/modules/product-management/category/queries/category.find.many.query';
+import { basePaginatedResponseHelper } from 'src/core/helpers/base.response.helper';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('product-management/category')
+@ApiTags('Category')
 export class CategoryController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -49,6 +58,25 @@ export class CategoryController {
       console.trace(e);
       throw e;
     }
+  }
+
+  @Get()
+  async findMany(@Res() res: Response, @Query() dto: CategoryFindManyQueryDto) {
+    const builder = Builder<CategoryFindManyQuery>(CategoryFindManyQuery, {
+      ...dto,
+    });
+
+    const { data, total } = await this.queryBus.execute<
+      CategoryFindManyQuery,
+      CategoryFindManyQueryResult
+    >(builder.build());
+
+    return basePaginatedResponseHelper(res, {
+      data: data,
+      total,
+      page: dto.page,
+      per_page: dto.limit,
+    });
   }
 
   //     @Get()
